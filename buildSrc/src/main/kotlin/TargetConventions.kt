@@ -34,27 +34,17 @@ fun KotlinMultiplatformExtension.configureJs() {
 
 @OptIn(ExperimentalWasmDsl::class)
 fun KotlinMultiplatformExtension.configureWasm() {
-    configureWasmForKtor()
+    wasmJs {
+        nodejs()
+    }
     wasmWasi {
         nodejs()
     }
 }
 
-@OptIn(ExperimentalWasmDsl::class)
-fun KotlinMultiplatformExtension.configureWasmForKtor() {
-    wasmJs {
-        nodejs()
-    }
-}
-
 fun KotlinMultiplatformExtension.configureNative() {
-    linuxArm64()
-    configureNativeForOpenAi()
-}
-
-fun KotlinMultiplatformExtension.configureNativeForOpenAi() {
     if (HostManager.hostIsMac) {
-        configureIosForGemini()
+        iosX64()
         // According to https://kotlinlang.org/docs/native-target-support.html
         // Tier 1
         macosX64()
@@ -70,32 +60,19 @@ fun KotlinMultiplatformExtension.configureNativeForOpenAi() {
         // Tier 3
         watchosDeviceArm64()
     }
-
     // Tier 2
     linuxX64()
-
     // Tier 3
     mingwX64()
-//    androidNativeArm32()
-//    androidNativeArm64()
-//    androidNativeX86()
-//    androidNativeX64()
+    linuxArm64()
 
     // setup tests running in RELEASE mode
     targets.withType<KotlinNativeTarget>().configureEach {
-        binaries.test(listOf(NativeBuildType.RELEASE))
+        binaries.test(listOf<NativeBuildType>(NativeBuildType.RELEASE))
     }
     targets.withType<KotlinNativeTargetWithTests<*>>().configureEach {
         testRuns.create("releaseTest") {
             setExecutionSourceFrom(binaries.getTest(NativeBuildType.RELEASE))
         }
-    }
-}
-
-fun KotlinMultiplatformExtension.configureIosForGemini() {
-    if (HostManager.hostIsMac) {
-        iosX64()
-        iosArm64()
-        iosSimulatorArm64()
     }
 }

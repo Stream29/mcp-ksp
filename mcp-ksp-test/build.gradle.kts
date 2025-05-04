@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":langchain4kt2-mcp"))
-    ksp(project(":langchain4kt2-mcp-ksp"))
+    api(project(":mcp"))
+    ksp(project(":mcp-ksp"))
     testImplementation(libs.kotlin.test)
 }

@@ -16,19 +16,12 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "langchain4kt-root"
-prefixedModule("core")
-prefixedModule("mcp")
-prefixedModule("mcp-ksp")
-prefixedModule("mcp-ksp-test")
-prefixedModule("api-google-gemini")
-prefixedModule("api-langchain4j")
-prefixedModule("api-springai")
-prefixedModule("api-openai")
-
-fun prefixedModule(name: String) {
-    val modulePrefix = "langchain4kt2-"
-    val prefixedName = modulePrefix + name
-    include(":$prefixedName")
-    project(":$prefixedName").projectDir = file("./$name")
-}
+rootProject.name = "mcp-ksp"
+include("core")
+include("mcp")
+include("mcp-ksp")
+include("mcp-ksp-test")
+include("api-google-gemini")
+include("api-langchain4j")
+include("api-springai")
+include("api-openai")
