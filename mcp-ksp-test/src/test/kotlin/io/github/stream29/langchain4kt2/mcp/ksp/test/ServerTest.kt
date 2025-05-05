@@ -1,6 +1,5 @@
 package io.github.stream29.langchain4kt2.mcp.ksp.test
 
-import io.github.stream29.langchain4kt2.mcp.addTool
 import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import io.modelcontextprotocol.kotlin.sdk.client.ClientOptions
@@ -61,7 +60,8 @@ class ServerTest {
         assertTrue { client.listTools()!!.tools.asSequence().map { it.name }.contains("response") }
         val response = client.callTool("response", mapOf("value" to "world"))!!
             .content.first().let { it as TextContent }.text
-        val expected = component.response("world")
+        println("schema: ${component.tools().first().tool.inputSchema}")
+        val expected = component.response(Box("world"))
         assertEquals(expected, response)
     }
 

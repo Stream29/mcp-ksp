@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.github.stream29.langchain4kt2.mcp.McpServerComponent
@@ -18,16 +17,11 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver.getSymbolsWithAnnotation(McpServerComponent::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>().forEach { ksClassDeclaration ->
-                val toolFuncNameList = ksClassDeclaration.getAllFunctions()
+                val toolFunctions = ksClassDeclaration.getAllFunctions()
                     .filter { func -> func.annotations.any { it.annotationType.qualifiedName() == McpTool::class.qualifiedName } }
-                    .map { func -> func.simpleName.asString() }
-                val makeTool = MemberName(
-                    "io.github.stream29.langchain4kt2.mcp",
-                    "makeTool"
-                )
                 val fileSpec = buildFileSpec(
                     ksClassDeclaration.packageName.asString(),
-                    "Generated\$${ksClassDeclaration.simpleName.asString()}"
+                    "Generated$${ksClassDeclaration.simpleName.asString()}"
                 ) {
                     addFunction("tools") {
                         receiver(ksClassDeclaration.toClassName())
@@ -37,8 +31,9 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                         }
                         addCode {
                             add("return listOf(")
-                            toolFuncNameList.forEach { funcName ->
-                                add("adapter.%M(\"$funcName\", null, this::$funcName),", makeTool)
+                            toolFunctions.forEach { func ->
+                                add(makeTool(func))
+                                add(",")
                             }
                             add(")")
                         }
