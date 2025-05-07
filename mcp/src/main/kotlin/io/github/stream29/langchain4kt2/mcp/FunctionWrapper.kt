@@ -1,6 +1,7 @@
 package io.github.stream29.langchain4kt2.mcp
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 
 @PublishedApi
 @Suppress("UnusedReceiverParameter")
@@ -13,7 +14,7 @@ internal inline fun <T, reified R> ServerAdapter.safeReturn(crossinline f: suspe
         val returnValue = f(param)
         when {
             returnValue is String -> returnValue
-            else -> encodeToString(returnValue)
+            else -> json.encodeToString<R>(returnValue)
         }
     }
 

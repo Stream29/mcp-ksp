@@ -6,7 +6,6 @@ import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredTool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 public class ServerAdapter(
@@ -35,17 +34,32 @@ public inline fun <reified T : Any, reified R> ServerAdapter.makeTool(
     name: String,
     description: String?,
     crossinline from: suspend (T) -> R
-): RegisteredTool =
-    if (schemaOf<T>().contains("properties")) makeToolUnsafe(name, description, safeReturn(from))
-    else makeToolUnsafe(name, description, boxedParam(safeReturn(from)))
+): RegisteredTool {
+    val rawSchema = schemaGenerator.schemaOf<T>().jsonObject
+    return if (rawSchema.contains("properties") && rawSchema.contains("required"))
+        makeToolUnsafe(
+            name,
+            description,
+            rawSchema,
+            safeReturn(from)
+        )
+    else
+        makeToolUnsafe(
+            name,
+            description,
+            schemaGenerator.schemaOf<Box<R>>().jsonObject,
+            boxedParam(safeReturn(from))
+        )
+}
 
 @PublishedApi
 internal inline fun <reified T : Any> ServerAdapter.makeToolUnsafe(
     name: String,
     description: String?,
+    schema: JsonObject,
     noinline handler: suspend (T) -> String
 ): RegisteredTool {
-    val inputSchema = schemaOf<T>()
+    val inputSchema = schemaGenerator.schemaOf<T>().jsonObject
     return RegisteredTool(
         Tool(
             name = name,
@@ -57,7 +71,7 @@ internal inline fun <reified T : Any> ServerAdapter.makeToolUnsafe(
         )
     ) handler@{ (_, arguments, _) ->
         try {
-            val param = decodeFromJsonElement<T>(arguments)
+            val param = json.decodeFromJsonElement<T>(arguments)
             val returnValue = handler(param)
             CallToolResult.ok(returnValue)
         } catch (e: Throwable) {
@@ -65,15 +79,3 @@ internal inline fun <reified T : Any> ServerAdapter.makeToolUnsafe(
         }
     }
 }
-
-@PublishedApi
-internal inline fun <reified T> ServerAdapter.schemaOf(): JsonObject =
-    schemaGenerator.schemaOf<T>().jsonObject
-
-@PublishedApi
-internal inline fun <reified T> ServerAdapter.decodeFromJsonElement(element: JsonElement): T =
-    json.decodeFromJsonElement<T>(element)
-
-@PublishedApi
-internal inline fun <reified T> ServerAdapter.encodeToString(value: T): String =
-    json.encodeToString(value)

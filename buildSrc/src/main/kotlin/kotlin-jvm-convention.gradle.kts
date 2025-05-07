@@ -4,4 +4,7 @@ plugins {
 
 kotlin {
     explicitApi()
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }

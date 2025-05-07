@@ -18,6 +18,13 @@ public inline fun FileSpec.Builder.addFunction(
     addFunction(buildFunSpec(name, buildAction))
 }
 
+public inline fun FileSpec.Builder.addClass(
+    name: String,
+    buildAction: TypeSpec.Builder.() -> Unit
+) {
+    addType(buildClassSpec(name, buildAction))
+}
+
 public inline fun FunSpec.Builder.addCode(buildAction: CodeBlock.Builder.() -> Unit) {
     addCode(CodeBlock.builder().apply(buildAction).build())
 }

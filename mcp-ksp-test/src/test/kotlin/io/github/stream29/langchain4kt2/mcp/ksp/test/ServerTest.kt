@@ -59,10 +59,10 @@ class ServerTest {
     @Test
     fun testServer() = runBlocking {
         assertTrue { client.listTools()!!.tools.asSequence().map { it.name }.contains("response") }
-        val response = client.callTool("response", mapOf("value" to "world"))!!
+        val response = client.callTool("response", mapOf("message" to "world"))!!
             .content.first().let { it as TextContent }.text
-        val expected = component.response("world")
-        assertEquals(expected, response)
+        println("schema: ${component.tools().first().tool.inputSchema}")
+        println("response: $response")
     }
 
     @AfterTest

@@ -8,4 +8,7 @@ kotlin {
     explicitApi()
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {}
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }

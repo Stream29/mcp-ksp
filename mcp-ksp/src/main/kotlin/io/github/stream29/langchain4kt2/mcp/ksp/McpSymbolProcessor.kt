@@ -10,7 +10,6 @@ import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.github.stream29.langchain4kt2.mcp.McpServerComponent
-import io.github.stream29.langchain4kt2.mcp.McpTool
 import io.github.stream29.langchain4kt2.mcp.ServerAdapter
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredTool
 
@@ -18,16 +17,16 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver.getSymbolsWithAnnotation(McpServerComponent::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>().forEach { ksClassDeclaration ->
-                val toolFuncList = ksClassDeclaration.getAllFunctions()
-                    .filter { func -> func.annotations.any { it.annotationType.qualifiedName() == McpTool::class.qualifiedName } }
-                val toolFuncNameList = toolFuncList.map { func -> func.simpleName.asString() }
+                val mcpToolList = ksClassDeclaration.getAllFunctions()
+                    .filter { it.isMcpTool() }
+                val mcpToolInfoList = mcpToolList.map { it.parseMcpToolInfo() }
                 val makeTool = MemberName(
                     "io.github.stream29.langchain4kt2.mcp",
                     "makeTool"
                 )
                 val fileSpec = buildFileSpec(
                     ksClassDeclaration.packageName.asString(),
-                    "Generated\$${ksClassDeclaration.simpleName.asString()}"
+                    "Generated$${ksClassDeclaration.simpleName.asString()}"
                 ) {
                     addFunction("tools") {
                         receiver(ksClassDeclaration.toClassName())
@@ -36,19 +35,24 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                             defaultValue("%T()", ServerAdapter::class)
                         }
                         addCode {
-                            add("return listOf(")
-                            toolFuncNameList.forEach { funcName ->
-                                add("adapter.%M(\"$funcName\", null, this::$funcName),", makeTool)
+                            add("return listOf(\n⇥⇥")
+                            mcpToolInfoList.forEach { mcpTool ->
+                                val functionName = if(mcpTool.isBoxNeeded) {
+                                    mcpTool.boxFunctionName
+                                } else {
+                                    mcpTool.functionName
+                                }
+                                add(
+                                    "adapter.%M(\n⇥⇥\"${mcpTool.functionName}\", \nnull, \nthis::`${functionName}`\n⇤⇤),\n",
+                                    makeTool
+                                )
                             }
-                            add(")")
+                            add("⇤⇤)")
                         }
                     }
-                    toolFuncList.forEach { func ->
-                        val paramList = func.parameters
-                        if (isBoxNeeded(paramList)) {
-                            addType(makeBox("${ksClassDeclaration.simpleName.asString()}$${func.simpleName.asString()}\$Box", paramList))
-                        }
-                    }
+                    mcpToolInfoList.asSequence()
+                        .filter { it.isBoxNeeded }
+                        .forEach { it.makeBox() }
                 }
                 fileSpec.writeTo(environment.codeGenerator, Dependencies(false))
             }

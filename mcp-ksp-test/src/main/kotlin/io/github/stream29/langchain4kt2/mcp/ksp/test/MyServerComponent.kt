@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @McpServerComponent
 public class MyServerComponent {
     @McpTool
-    public suspend fun response(message: String): String {
-        return "Hello, $message"
+    public suspend fun response(message: String?): List<String> {
+        return listOf(message!!)
     }
 }
