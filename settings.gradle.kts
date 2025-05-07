@@ -16,12 +16,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "mcp-ksp"
-include("core")
+rootProject.name = "mcp-ksp-root"
 include("mcp")
 include("mcp-ksp")
 include("mcp-ksp-test")
-include("api-google-gemini")
-include("api-langchain4j")
-include("api-springai")
-include("api-openai")
