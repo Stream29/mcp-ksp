@@ -47,7 +47,7 @@ public inline fun <reified T : Any, reified R> ServerAdapter.makeTool(
         makeToolUnsafe(
             name,
             description,
-            schemaGenerator.schemaOf<Box<R>>().jsonObject,
+            schemaGenerator.schemaOf<Box<T>>().jsonObject,
             boxedParam(safeReturn(from))
         )
 }
