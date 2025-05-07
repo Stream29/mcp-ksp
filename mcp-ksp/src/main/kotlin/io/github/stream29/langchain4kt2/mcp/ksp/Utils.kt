@@ -44,6 +44,14 @@ public inline fun TypeSpec.Builder.addProperty(
     )
 }
 
+public inline fun TypeSpec.Builder.primaryConstructor(
+    buildAction: FunSpec.Builder.() -> Unit
+) {
+    primaryConstructor(
+        FunSpec.constructorBuilder().apply(buildAction).build()
+    )
+}
+
 public inline fun <reified T> FunSpec.Builder.returns() {
     returns(typeNameOf<T>())
 }

@@ -18,9 +18,9 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver.getSymbolsWithAnnotation(McpServerComponent::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>().forEach { ksClassDeclaration ->
-                val toolFuncNameList = ksClassDeclaration.getAllFunctions()
+                val toolFuncList = ksClassDeclaration.getAllFunctions()
                     .filter { func -> func.annotations.any { it.annotationType.qualifiedName() == McpTool::class.qualifiedName } }
-                    .map { func -> func.simpleName.asString() }
+                val toolFuncNameList = toolFuncList.map { func -> func.simpleName.asString() }
                 val makeTool = MemberName(
                     "io.github.stream29.langchain4kt2.mcp",
                     "makeTool"
@@ -41,6 +41,12 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                                 add("adapter.%M(\"$funcName\", null, this::$funcName),", makeTool)
                             }
                             add(")")
+                        }
+                    }
+                    toolFuncList.forEach { func ->
+                        val paramList = func.parameters
+                        if (isBoxNeeded(paramList)) {
+                            addType(makeBox("${ksClassDeclaration.simpleName.asString()}$${func.simpleName.asString()}\$Box", paramList))
                         }
                     }
                 }

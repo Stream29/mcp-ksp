@@ -6,6 +6,7 @@ import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredTool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 public class ServerAdapter(
