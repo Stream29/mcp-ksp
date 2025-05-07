@@ -25,6 +25,25 @@ public inline fun FunSpec.Builder.addCode(buildAction: CodeBlock.Builder.() -> U
 public inline fun buildFunSpec(name: String, builder: FunSpec.Builder.() -> Unit): FunSpec =
     FunSpec.builder(name).apply(builder).build()
 
+public inline fun buildClassSpec(
+    name: String,
+    builder: TypeSpec.Builder.() -> Unit
+): TypeSpec = TypeSpec.classBuilder(name).apply(builder).build()
+
+public inline fun <reified T> TypeSpec.Builder.addAnnotation() {
+    addAnnotation(T::class)
+}
+
+public inline fun TypeSpec.Builder.addProperty(
+    name: String,
+    type: TypeName,
+    buildAction: PropertySpec.Builder.() -> Unit = {}
+) {
+    addProperty(
+        PropertySpec.builder(name, type).apply(buildAction).build()
+    )
+}
+
 public inline fun <reified T> FunSpec.Builder.returns() {
     returns(typeNameOf<T>())
 }
