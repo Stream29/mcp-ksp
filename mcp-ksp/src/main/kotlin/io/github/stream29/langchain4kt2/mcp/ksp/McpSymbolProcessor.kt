@@ -9,13 +9,13 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
-import io.github.stream29.langchain4kt2.mcp.McpServerComponent
+import io.github.stream29.langchain4kt2.mcp.McpServer
 import io.github.stream29.langchain4kt2.mcp.ServerAdapter
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredTool
 
 public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        resolver.getSymbolsWithAnnotation(McpServerComponent::class.qualifiedName!!)
+        resolver.getSymbolsWithAnnotation(McpServer::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>().forEach { ksClassDeclaration ->
                 val mcpToolList = ksClassDeclaration.getAllFunctions()
                     .filter { it.isMcpTool() }
