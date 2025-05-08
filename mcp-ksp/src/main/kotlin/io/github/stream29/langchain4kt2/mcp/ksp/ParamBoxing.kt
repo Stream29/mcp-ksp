@@ -1,6 +1,8 @@
 package io.github.stream29.langchain4kt2.mcp.ksp
 
 import com.google.devtools.ksp.symbol.KSValueParameter
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.AnnotationSpec.UseSiteTarget.*
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
@@ -35,7 +37,10 @@ public fun McpToolFunctionInfo.makeBox() {
         paramInfos.forEach { paramInfo ->
             addProperty(paramInfo.name, paramInfo.type) {
                 initializer(paramInfo.name)
-                addAnnotations(paramInfo.parameterAnnotations.map { it.toAnnotationSpec() })
+                addAnnotations(
+                    paramInfo.parameterAnnotations
+                        .map { it.toAnnotationSpec().apply { setField("useSiteTarget", PROPERTY) } }
+                )
             }
         }
     }
@@ -51,5 +56,12 @@ public fun McpToolFunctionInfo.makeBox() {
             }
             add("⇤⇤)\n")
         }
+    }
+}
+
+private fun Any.setField(name: String, value: Any?) {
+    this::class.java.declaredFields.find { it.name == name }?.apply {
+        isAccessible = true
+        set(this@setField, value)
     }
 }
