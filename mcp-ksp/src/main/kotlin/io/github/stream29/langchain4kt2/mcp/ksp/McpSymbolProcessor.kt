@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import io.github.stream29.langchain4kt2.mcp.McpServer
@@ -17,6 +18,7 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver.getSymbolsWithAnnotation(McpServer::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>().forEach { ksClassDeclaration ->
+                val className = ksClassDeclaration.toClassName()
                 val mcpToolList = ksClassDeclaration.getAllFunctions()
                     .filter { it.isMcpTool() }
                 val mcpToolInfoList = mcpToolList.map { it.parseMcpToolInfo() }
@@ -37,14 +39,22 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                         addCode {
                             add("return listOf(\n⇥⇥")
                             mcpToolInfoList.forEach { mcpTool ->
-                                val functionName = if(mcpTool.isBoxNeeded) {
+                                val functionName = if (mcpTool.isBoxNeeded) {
                                     mcpTool.boxFunctionName
                                 } else {
                                     mcpTool.functionName
                                 }
+                                val memberName = if (mcpTool.isBoxNeeded) {
+                                    MemberName(ksClassDeclaration.packageName.asString(), mcpTool.boxFunctionName, true)
+                                } else {
+                                    className.member(functionName)
+                                }
                                 add(
-                                    "adapter.%M(\n⇥⇥\"${mcpTool.functionName}\", \nnull, \nthis::`${functionName}`\n⇤⇤),\n",
-                                    makeTool
+                                    "adapter.%M(\n⇥⇥%S, \n%S, \nthis::%M\n⇤⇤),\n",
+                                    makeTool,
+                                    mcpTool.name,
+                                    mcpTool.description,
+                                    memberName
                                 )
                             }
                             add("⇤⇤)")

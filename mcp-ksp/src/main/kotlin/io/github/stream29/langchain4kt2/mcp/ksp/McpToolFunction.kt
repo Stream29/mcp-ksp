@@ -1,10 +1,6 @@
 package io.github.stream29.langchain4kt2.mcp.ksp
 
-import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSValueParameter
+import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -13,17 +9,31 @@ import io.github.stream29.langchain4kt2.mcp.McpTool
 public fun KSFunctionDeclaration.isMcpTool() =
     annotations.any { it.annotationType.qualifiedName() == McpTool::class.qualifiedName }
 
-public fun KSFunctionDeclaration.parseMcpToolInfo() =
-    McpToolFunctionInfo(
+public fun KSFunctionDeclaration.parseMcpToolInfo(): McpToolFunctionInfo {
+    val annotation = parseAnnotation()
+    val functionName = this.simpleName.asString()
+    val classDeclaration = this.parentDeclaration as KSClassDeclaration
+    return McpToolFunctionInfo(
+        name = annotation.name.ifEmpty { functionName },
+        description = annotation.description.ifEmpty { null },
         funcDeclaration = this,
-        classDeclaration = this.parentDeclaration as KSClassDeclaration,
-        className = this.parentDeclaration!!.simpleName.asString(),
-        functionName = this.simpleName.asString(),
+        classDeclaration = classDeclaration,
+        className = classDeclaration.simpleName.asString(),
+        functionName = functionName,
         annotations = this.annotations.toList(),
-        params = this.parameters.toList(),
+        params = this.parameters,
         paramInfos = parameters.map { it.parseParamInfo() },
         isBoxNeeded = isBoxNeeded(parameters),
     )
+}
+
+public fun KSFunctionDeclaration.parseAnnotation(): McpTool {
+    val descriptionAnnotation = annotations.first { it.annotationType.qualifiedName() == McpTool::class.qualifiedName }
+    val annotationParams = descriptionAnnotation.arguments.associateBy { it.name?.asString() }
+    val name = annotationParams["name"]!!.value as String
+    val description = annotationParams["description"]!!.value as String
+    return McpTool(name, description)
+}
 
 public fun KSValueParameter.parseParamInfo(): ParamInfo {
     val type = this.type.resolve()
@@ -64,11 +74,15 @@ public fun KSAnnotation.allowedUseSites(): List<AnnotationTarget> {
             AnnotationTarget.PROPERTY_GETTER,
             AnnotationTarget.PROPERTY_SETTER
         ) // See at https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/
+
+    @Suppress("UNCHECKED_CAST")
     val allowedTargets = targetAnnotation.arguments.first().value as List<KSType>
     return allowedTargets.map { AnnotationTarget.valueOf(it.declaration.simpleName.asString()) }
 }
 
 public data class McpToolFunctionInfo(
+    val name: String,
+    val description: String?,
     val classDeclaration: KSClassDeclaration,
     val className: String,
     val funcDeclaration: KSFunctionDeclaration,
