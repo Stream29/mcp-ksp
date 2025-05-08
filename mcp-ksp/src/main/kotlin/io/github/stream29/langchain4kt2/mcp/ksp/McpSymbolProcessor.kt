@@ -45,7 +45,11 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                                     mcpTool.functionName
                                 }
                                 val memberName = if (mcpTool.isBoxNeeded) {
-                                    MemberName(ksClassDeclaration.packageName.asString(), mcpTool.boxFunctionName, true)
+                                    MemberName(
+                                        ksClassDeclaration.packageName.asString(),
+                                        mcpTool.boxFunctionName,
+                                        true
+                                    )
                                 } else {
                                     className.member(functionName)
                                 }
