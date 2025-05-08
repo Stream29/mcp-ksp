@@ -8,8 +8,9 @@ import io.github.stream29.langchain4kt2.mcp.McpTool
 public class MyServerComponent {
     @McpTool(description = "Response as a list")
     public fun response(
-        @Description("The only value in the list") message: String
+        @Description("The first value in the list") message1: String,
+        @Description("The second value in the list") message2: String,
     ): List<String> {
-        return listOf(message)
+        return listOf(message1, message2)
     }
 }
