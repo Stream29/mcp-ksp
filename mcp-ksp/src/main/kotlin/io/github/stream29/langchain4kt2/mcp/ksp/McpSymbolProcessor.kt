@@ -54,11 +54,11 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                                     className.member(functionName)
                                 }
                                 add(
-                                    "adapter.%M(\n⇥⇥%S, \n%S, \nthis::%M\n⇤⇤),\n",
+                                    "adapter.%M(\n⇥⇥%S, \n%S, \nthis::`%L`\n⇤⇤),\n",
                                     makeTool,
                                     mcpTool.name,
                                     mcpTool.description,
-                                    memberName
+                                    functionName
                                 )
                             }
                             add("⇤⇤)")
