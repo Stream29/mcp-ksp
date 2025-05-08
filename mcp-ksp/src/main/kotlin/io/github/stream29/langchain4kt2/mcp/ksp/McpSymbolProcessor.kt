@@ -44,15 +44,6 @@ public class McpSymbolProcessor(private val environment: SymbolProcessorEnvironm
                                 } else {
                                     mcpTool.functionName
                                 }
-                                val memberName = if (mcpTool.isBoxNeeded) {
-                                    MemberName(
-                                        ksClassDeclaration.packageName.asString(),
-                                        mcpTool.boxFunctionName,
-                                        true
-                                    )
-                                } else {
-                                    className.member(functionName)
-                                }
                                 add(
                                     "adapter.%M(\n⇥⇥%S, \n%S, \nthis::`%L`\n⇤⇤),\n",
                                     makeTool,
