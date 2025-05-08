@@ -5,7 +5,6 @@ plugins {
 }
 
 kotlin {
-    withSourcesJar()
     explicitApi()
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {}

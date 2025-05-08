@@ -12,6 +12,10 @@ dependencies {
     testImplementation(libs.kotlin.test)
 }
 
+java {
+    withSourcesJar()
+}
+
 publishing {
     publications.find { it.name == "maven" }?.let {
         val publication = it as MavenPublication
