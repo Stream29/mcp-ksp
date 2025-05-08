@@ -7,5 +7,8 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xcontext-parameters")
     }
-    target.withSourcesJar()
+}
+
+java {
+    withSourcesJar()
 }
