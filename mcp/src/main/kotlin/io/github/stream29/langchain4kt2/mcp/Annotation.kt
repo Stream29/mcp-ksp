@@ -6,4 +6,7 @@ public annotation class McpServer
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.FUNCTION)
-public annotation class McpTool
+public annotation class McpTool(
+    public val name: String = "",
+    public val description: String = "",
+)
