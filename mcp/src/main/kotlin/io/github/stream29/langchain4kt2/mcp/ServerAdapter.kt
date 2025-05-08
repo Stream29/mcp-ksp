@@ -4,6 +4,8 @@ import io.github.stream29.jsonschemagenerator.SchemaGenerator
 import io.github.stream29.jsonschemagenerator.schemaOf
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.Tool
+import io.modelcontextprotocol.kotlin.sdk.error
+import io.modelcontextprotocol.kotlin.sdk.ok
 import io.modelcontextprotocol.kotlin.sdk.server.RegisteredTool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.json.*
